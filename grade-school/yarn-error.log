@@ -1,0 +1,56 @@
+Arguments: 
+  /usr/local/Cellar/node/16.3.0/bin/node /usr/local/bin/yarn install
+
+PATH: 
+  /Users/jgoebel/.brew/opt/gettext/bin:/Users/jgoebel/.brew/opt/fzf/bin:/usr/local/opt/fzf/bin:/Users/jgoebel/.rbenv/shims:/Users/jgoebel/.brew/bin:/Users/jgoebel/.brew/sbin:/Applications/Development/Visual Studio Code.app/Contents/Resources/app/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/CrossPack-AVR/bin:/Library/TeX/texbin:/Users/jgoebel/bin:/Users/jgoebel/.rbenv/bin:/usr/local/sbin/
+
+Yarn version: 
+  1.22.10
+
+Node version: 
+  16.3.0
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: EEXIST: file already exists, mkdir '/Users/jgoebel/Exercism/javascript/grade-school/node_modules'
+
+npm manifest: 
+  {
+    "name": "@exercism/javascript-grade-school",
+    "description": "Exercism exercises in Javascript.",
+    "author": "Katrina Owen",
+    "private": true,
+    "license": "MIT",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/exercism/javascript",
+      "directory": "exercises/practice/grade-school"
+    },
+    "devDependencies": {
+      "@babel/cli": "^7.14.8",
+      "@babel/core": "^7.15.0",
+      "@babel/plugin-syntax-bigint": "^7.8.3",
+      "@babel/preset-env": "^7.15.0",
+      "@exercism/eslint-config-javascript": "^0.4.0",
+      "@types/jest": "^26.0.24",
+      "@types/node": "^16.4.13",
+      "babel-jest": "^27.0.6",
+      "core-js": "^3.16.0",
+      "eslint": "^7.32.0",
+      "jest": "^26.6.3"
+    },
+    "dependencies": {},
+    "scripts": {
+      "test": "jest --no-cache ./*",
+      "watch": "jest --no-cache --watch ./*",
+      "lint": "eslint ."
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
