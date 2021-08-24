@@ -1,18 +1,9 @@
-class Student {
-  constructor(name, grade) {
-    this.name = name
-    this.grade = grade
-  }
-}
-
 export class GradeSchool {
-  #students
   #students_by_name
   #grades
 
   constructor() {
     this.#students_by_name = {}
-    // this.#students = []
     this.#grades = new Set()
   }
   roster () {
@@ -26,19 +17,11 @@ export class GradeSchool {
   }
   add(name, grade) {
     this.#grades.add(grade)
-    let student = this.#students_by_name[name]
-    if (student) {
-      // moving existing student to new grade
-      student.grade = grade
-    } else {
-      const student = new Student(name, grade)
-      this.#students_by_name[name] = student
-      // this.#students.push(student)
-    }
+    this.#students_by_name[name] = grade
   }
   grade(grade) {
-    return Object.values(this.#students_by_name)
-      .filter (s => s.grade === grade )
-      .map(x => x.name).sort()
+    return Object.entries(this.#students_by_name)
+      .filter (([_,studentGrade]) => studentGrade === grade )
+      .map(([name,_]) => name).sort()
   }
 }
