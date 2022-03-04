@@ -1,61 +1,78 @@
 export function deepClone(node) {
     let fresh = Object.assign({}, node)
     for (let key in node) {
-        if (typeof fresh[key] === "object")
-            fresh[key] = fresh[key] && deepClone(fresh[key])
+        if (typeof fresh[key] === "object" && fresh[key] !== null)
+            fresh[key] = deepClone(fresh[key])
     }
     return fresh
 }
 
 export class Zipper {
+    // points to a node in a larger tree data structure
+    node
+    // points to the parent node (of `node`)
+    parent
+    // tracks which of the parents two keys (`right` or `left`) points
+    // to `node`, this is to allow the us to create a new parent when
+    // traversing upwards that has the correct downward pointer to `node`
+    childKey
+
     static fromTree(tree) {
+        // this isn't strictly necessary but it's done just for safety such
+        // that Zipper owns the data and it can't be mutated later
         return new Zipper(deepClone(tree))
     }
 
-    constructor(focus, {parent} = {}) {
-        this.focusNode = focus
+    constructor(node, {parent, childKey} = {}) {
+        this.node = node
         this.parent = parent
-    }
-
-    // when we request a zipper for a non existent node
-    // we will get null instead
-    newZipper(node) {
-        return node && new Zipper(node, {parent: this})
+        this.childKey = childKey
     }
 
     left() {
-        return this.newZipper(this.focusNode.left)
+        if (!this.node.left) return null;
+
+        return new Zipper(this.node.left, {parent: this, childKey: "left"})
     }
 
     right() {
-        return this.newZipper(this.focusNode.right)
+        if (!this.node.right) return null;
+
+        return new Zipper(this.node.right, {parent: this, childKey: "right"})
     }
 
-    setLeft(node) {
-        return this._cloneSelf({left: node})
+    setLeft(left) {
+        let newNode = {...this.node, left }
+        return new Zipper(newNode, { parent: this.parent, childKey: this.childKey })
     }
 
-    setRight(node) {
-        return this._cloneSelf({right: node})
+    setRight(right) {
+        let newNode = { ...this.node, right }
+        return new Zipper(newNode, { parent: this.parent, childKey: this.childKey })
     }
 
-    setValue(v) {
-        return this._cloneSelf({value: v})
+    setValue(value) {
+        let newNode = {...this.node, value }
+        return new Zipper(newNode, {parent: this.parent, childKey: this.childKey})
     }
 
-    _cloneSelf(data) {
-        Object.assign(this.focusNode,data)
-        return this.newZipper(this.focusNode)
-    }
-
-    value() {
-        return this.focusNode.value
-    }
+    value = () =>  this.node.value
 
     up() {
         if (this.isRoot) return null;
 
-        return new Zipper(this.parent.focusNode, {parent: this.parent.parent})
+        return new Zipper(
+            {
+                ...this.parent.node,
+                // rewrite `left` or `right` paretn key to point to the
+                // current iteration of `this.node` (because it may have
+                // changed since we descended)
+                [this.childKey]: this.node,
+            },
+            {
+                parent: this.parent.parent,
+                childKey: this.parent.childKey
+            })
     }
 
     get isRoot() {
@@ -64,11 +81,11 @@ export class Zipper {
 
     // returns the top-most node (ie, the full tree)
     toTree() {
-        let node = this
-        while (node.parent) {
-            node = node.parent
+        let pos = this
+        while (!pos.isRoot) {
+            pos = pos.up()
         }
-        return node.focusNode
+        return pos.node
     }
 
 }
