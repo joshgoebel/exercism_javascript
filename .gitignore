@@ -13,3 +13,5 @@ README.md
 **/.eslintrc
 **/.gitignore
 **/.npmrc
+
+.DS_Store
