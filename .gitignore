@@ -2,3 +2,14 @@
 node_modules
 # javascript deaths
 report.20*.json
+
+**/package-lock.json
+yarn.lock
+HELP.md
+HINTS.md
+README.md
+**/LICENSE*
+
+**/.eslintrc
+**/.gitignore
+**/.npmrc

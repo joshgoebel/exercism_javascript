@@ -28,6 +28,12 @@ describe('concat lists and lists of lists into new list', () => {
     expect(list1.concat(list2).values).toEqual([]);
   });
 
+  test('empty list', () => {
+    const list1 = new List();
+    const list2 = new List([1,2,3]);
+    expect(list1.concat(list2).values).toEqual([]);
+  });
+
   test('list of lists', () => {
     const list1 = new List([1, 2]);
     const list2 = new List([3]);

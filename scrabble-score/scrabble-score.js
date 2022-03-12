@@ -26,3 +26,20 @@ const sum = (list, {using: fn}) => list.reduce((acc,el) => acc + fn(el),0 )
 const scoreTile = (tile) => TILE_VALUES.get(tile) || 0
 const tiles = (word) => [...word.toUpperCase()]
 
+
+const bonusMultiple = (x) => x + 1
+export const scoreBonus = word => {
+  let lastLetter
+  let repeatedRun = 0
+
+  return [...word.toUpperCase()].reduce((score, letter) => {
+    lastLetter == letter
+      ? repeatedRun += 1
+      : repeatedRun = 0
+
+    const acc = scoreTile(letter) * bonusMultiple(repeatedRun) + score
+    lastLetter = letter
+    return acc
+  }, 0)
+}
+

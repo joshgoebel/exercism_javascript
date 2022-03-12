@@ -20,6 +20,19 @@ class Enumerable {
     [Symbol.iterator]() {
         return this.list[Symbol.iterator]()
     }
+    filter(fn) {
+        let el
+        let iterator ={
+            next: () => {
+                while (!(el=this.list.next()).done) {
+                    if (fn(el.value)) return el;
+                }
+                return el
+            },
+            [Symbol.iterator]: function() { return iterator; }
+        }
+        return new Enumerable(iterator);
+    }
     find(fn) {
         for (let el of this) {
             if (fn(el)) return el;
@@ -53,8 +66,19 @@ const QUALIFIER_FNS = {
 export const meetupDay = (year, month, dayOfWeek, qualifier) => {
     let day = daysInMonth(year,month)
         .toEnum()
+        .filter(day =>
+            nameOfDay(day) == dayOfWeek)
         .find(day =>
-            nameOfDay(day) == dayOfWeek && QUALIFIER_FNS[qualifier](day))
+            ({
+                "1st": (_) => true,
+                "2nd": (d) => d.getDate() >= 8,
+                "teenth": (d) => d.getDate() >= 13,
+                "3rd": (d) => d.getDate() >= 15,
+                "4th": (d) => d.getDate() >= 22,
+                "5th": (d) => d.getDate() >= 29,
+                "last": (d) => d.getDate() >= lastWeekOfMonthStarts(d).getDate()
+            }[qualifier](day))
+        )
 
     if (!day) { throw "date not found" }
 

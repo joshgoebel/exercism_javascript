@@ -83,4 +83,11 @@ describe('School', () => {
 
     expect(school.grade(2)).toEqual([]);
   });
+
+  test("a student can't be added to same grade twice", () => {
+    school.add('Aimee', 2);
+    school.add('Aimee', 2);
+
+    expect(school.grade(2)).toEqual(["Aimee"]);
+  });
 });

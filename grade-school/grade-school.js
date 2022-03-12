@@ -1,27 +1,33 @@
-export class GradeSchool {
-  #students_by_name
-  #grades
+// pretty, likely not fast
+const clone = (x) => JSON.parse(JSON.stringify(x))
 
-  constructor() {
-    this.#students_by_name = {}
-    this.#grades = new Set()
-  }
+export class GradeSchool {
+  #grades = {}
+
   roster () {
-    return this.gradeList.reduce((acc, el) => {
-      acc[el] = this.grade(el);
-      return acc
-    },{})
+    return clone(this.#grades)
   }
+
   get gradeList() {
-    return [...this.#grades]
+    return Object.keys(this.#grades)
   }
-  add(name, grade) {
-    this.#grades.add(grade)
-    this.#students_by_name[name] = grade
+
+  removeFromAllGrades(student) {
+    for (let [grade, students] of Object.entries(this.#grades)) {
+      this.#grades[grade] = students.filter(name => name !== student)
+    }
   }
+
+  add(student, grade) {
+    // a student may only be enrolled in a single grade
+    this.removeFromAllGrades(student)
+    this.#grades[grade] = this
+      .grade(grade)
+      .concat(student)
+      .sort()
+  }
+
   grade(grade) {
-    return Object.entries(this.#students_by_name)
-      .filter (([_,studentGrade]) => studentGrade === grade )
-      .map(([name,_]) => name).sort()
+    return [ ...(this.#grades[grade] || []) ]
   }
 }

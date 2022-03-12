@@ -7,7 +7,7 @@ export class LinkedList {
         "in the middle" of the list, rather than at the edges
         */
         this._preHead = new Node()
-        this._postTail = new Node(null, this.preHead)
+        this._postTail = new Node(null, {previous: this.preHead })
         this._preHead.next = this.postTail
     }
 
@@ -47,13 +47,13 @@ export class LinkedList {
 
     delete(data) {
         let node = this.findNode(data)
-        if (node) this.remove(node)
+        if (node)
+            this.remove(node)
     }
 
     count() {
-        // return [...this].length
         var count = 0
-        for (let node of this) {
+        for (let _ of this) {
             count++
         }
         return count
@@ -79,9 +79,10 @@ export class LinkedList {
     }
 
     insert(data, {between: [previous, next]}) {
-        let node = new Node(data,previous,next)
+        let node = new Node(data,{previous,next})
 
-        previous.next = next.previous = node
+        previous.next = node
+        next.previous = node
     }
 
     remove(node) {
@@ -92,7 +93,7 @@ export class LinkedList {
 }
 
 class Node {
-    constructor(data, previous = null, next = null) {
+    constructor(data, {previous, next} = {}) {
         this._data = data
         this.previous = previous
         this.next = next

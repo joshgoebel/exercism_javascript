@@ -13,11 +13,15 @@ const transpose = (grid) => {
 
 export class Matrix {
   constructor(matrix) {
-    this.matrix = matrix
+    this.rawData = matrix
+  }
+
+  parse(rawData) {
+    return lines(rawData).map((row) => row.match(/\d+/g).map(Number))
   }
 
   get rows() {
-    return lines(this.matrix).map((row) => row.match(/\d+/g).map(Number))
+    return this.parse(this.rawData)
   }
 
   get columns() {

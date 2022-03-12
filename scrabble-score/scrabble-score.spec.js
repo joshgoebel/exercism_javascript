@@ -1,4 +1,4 @@
-import { score } from './scrabble-score';
+import { score, scoreBonus } from './scrabble-score';
 
 describe('Scrabble', () => {
   test('lowercase letter', () => {
@@ -48,4 +48,24 @@ describe('Scrabble', () => {
   test('entire alphabet available', () => {
     expect(score('abcdefghijklmnopqrstuvwxyz')).toEqual(87);
   });
+
+  test('bonus empty input', () => {
+    expect(scoreBonus('')).toEqual(0)
+  })
+
+  test('bonus quirky word', () => {
+    expect(score('quirky')).toEqual(22)
+  })
+
+  test('bonus double', () => {
+    expect(scoreBonus('street')).toEqual(7)
+  })
+
+  test('bonus triple', () => {
+    expect(scoreBonus('skilllessness')).toEqual(22)
+  })
+
+  test('bonus triple Z', () => {
+    expect(scoreBonus('Zzz')).toEqual(60)
+  })
 });

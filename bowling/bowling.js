@@ -13,57 +13,76 @@ const isStrike = ([a,b]) => a === STRIKE
 
 export class Bowling {
   constructor()  {
-    this._rolls = []
+    this.startNewFrame()
     this._frames = []
     this._bonus = 0
-    this._rollsLeft = 2
   }
-  roll(pins) {
-    if (this.gameOver()) throw('Cannot roll after game is over')
+
+  assertValidPins(pins) {
     if (pins<0 )
       throw('Negative roll is invalid')
     if (pins>10 )
       throw('Pin count exceeds pins on the lane')
+  }
 
+  currentFrame() {
+    let frame = this._frames.length + 1
+    return frame > 10 ? 10 : frame
+  }
+
+  rollingLastFrame() {
+    return this.currentFrame()===10
+  }
+
+  justRolledStrike() {
+    return isStrike(this._rolls) && this.firstRollofFrame()
+  }
+
+  justRolledSpare() {
+    return isSpare(this._rolls) && this._rolls.length===2
+  }
+
+  gainBonusRoll(n = 1) {
+    this._rollsLeft = n
+  }
+
+  roll(pins) {
+    if (this.gameOver()) throw('Cannot roll after game is over')
+    this.assertValidPins(pins)
 
     this._rolls.push(pins)
     this._rollsLeft -= 1
-    this.addStrikeBonus(pins)
-    if ((this._frames.length===9) && pins == STRIKE && this._rolls.length===1) {
-      this._rollsLeft = 2
-    //   return
-    }
-    else if (pins === STRIKE && this._frames.length < 9) {
-      // if (this._frames.length===9) return
-      this.endFrame()
-      // this._rollsLeft = 0
-    }
-    if (this.rollAfterSpare()) {
-      this._bonus += pins
+
+    this.addPriorStrikeBonus(pins)
+    if (this.rollAfterSpare()) { this._bonus += pins }
+
+    if (this.justRolledStrike()) {
+      if (this.rollingLastFrame())
+        // during the last frame a strike means we get two bonus rolls
+        this.gainBonusRoll(2)
+      else
+        this._rollsLeft = 0
     }
 
-    if (this._frames.length===9 && isSpare(this._rolls) && this._rolls.length===2) {
-      this._rollsLeft = 1
+    if (this.rollingLastFrame() && this.justRolledSpare()) {
+      this.gainBonusRoll()
     }
+
     if (this._rollsLeft===0) {
       this.endFrame()
     }
   }
 
-  addStrikeBonus(pins) {
-    // if (this._frames.length===9 && this._rolls.length>1) return
-    // let recentStrikes = this._frames.slice(-2).filter(isStrike)
-    let rolls = this._rolls.slice(0,-1)
-    if (this._frames.length===9) rolls = rolls.map(_ => 0)
-    let recentStrikes = [...this._frames, ...rolls].flat().slice(-2).filter((x) => x===STRIKE).length
-    // console.log(pins, "recent strikes", recentStrikes)
-    // console.log(recentStrikes)w
-    // console.log("adding bonus", (recentStrikes * pins))
-    return this._bonus += (recentStrikes * pins)
+  _recentStrikes() {
+    // this only really affects the last frame because all other strikes
+    // will always be in _frames, not _rolls... we zero these out to prevent
+    // them from creating additional bonuses during the last frame
+    let rolls = this._rolls.slice(0,-1).map(_ => 0)
+    return [...this._frames, ...rolls].flat().slice(-2).filter((x) => x===STRIKE).length
   }
 
-  finalFrame() {
-    return this._frames.length === 10
+  addPriorStrikeBonus(pins) {
+    return this._bonus += this._recentStrikes() * pins
   }
 
   firstRollofFrame() {
@@ -77,9 +96,9 @@ export class Bowling {
   }
 
   validateFrame([a,b,c]) {
-    if (!this.finalFrame() && a+(b||0)+(c||0) > 10)
+    if (!this.rollingLastFrame() && a+(b||0) > 10)
       throw('Pin count exceeds pins on the lane')
-    if (this.finalFrame() && a==10) {
+    if (this.rollingLastFrame() && a==10) {
       if (b!=10 && (b||0)+(c||0) > 10) {
         throw('Pin count exceeds pins on the lane')
       }
@@ -89,12 +108,16 @@ export class Bowling {
   endFrame() {
     this._frames.push(this._rolls)
     this.validateFrame(this._rolls)
+    this.startNewFrame()
+  }
+
+  startNewFrame() {
     this._rolls = []
     this._rollsLeft = 2
   }
 
   gameOver() {
-    return this.finalFrame()
+    return this._frames.length === 10
   }
 
   score() {

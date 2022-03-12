@@ -38,13 +38,18 @@ class Codon {
     this.codon = codon;
   }
 
-  isTerminating() {
+  get isTerminating() {
     return TERMINATING_CODONS.includes(this.codon);
   }
 
+  get invalid() {
+    return codonToProtein(this.codon) == undefined
+  }
+
+  toString() { return this.codon }
   protein() {
     const protein = codonToProtein(this.codon)
-    if (!protein) { throw(`Invalid codon ${this.codon}`) }
+    // if (!protein) { throw(`Invalid codon ${this.codon}`) }
 
     return protein;
   }
@@ -53,13 +58,14 @@ class Codon {
 export const proteinTranslation = (rna_sequence) => {
   if (!rna_sequence) { return [] }; // explicit
 
-  var result = []
+  var proteins = []
   for (let codon of splitCodons(rna_sequence)) {
-    if (codon.isTerminating()) break;
+    if (codon.isTerminating) break;
+    if (codon.invalid) { throw(`Invalid codon ${codon}`) }
 
-    result.push(codon.protein());
+    proteins.push(codon.protein());
   }
-  return result;
+  return proteins;
 };
 
 const splitCodons = (s) => s.match(/.{1,3}/g).map((c) => new Codon(c)) || []

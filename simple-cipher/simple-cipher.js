@@ -5,6 +5,7 @@ const DEFAULTS = {
 }
 const [RIGHT, LEFT] = [Symbol(), Symbol()]
 
+// normalize alphabet values A => 0, Z => 25, and vise-versa
 const alphabetValue = (char) => char.charCodeAt(0) - LETTER_A_CODE
 const valueToAlphabet = (value) => String.fromCharCode(value + LETTER_A_CODE)
 const random = (max) => Math.floor((Math.random() * max))
@@ -40,11 +41,11 @@ export class Cipher {
 
   encodeLetter(char, i, shiftDirection) {
     let sign = shiftDirection == RIGHT ? +1 : -1
-    let offset = this._keyCodeAt(i) * sign
+    let offset = this._keyOffsetAtIndex(i) * sign
     return this._offsetCharacter(char, offset)
   }
 
-  _keyCodeAt(i) {
+  _keyOffsetAtIndex(i) {
     return alphabetValue(this.key[i % this.key.length])
   }
 

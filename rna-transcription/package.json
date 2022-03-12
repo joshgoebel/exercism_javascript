@@ -30,6 +30,5 @@
     "lint": "eslint .",
     "lint-test": "eslint . && jest --no-cache ./* "
   },
-  "license": "MIT",
-  "dependencies": {}
+  "license": "MIT"
 }

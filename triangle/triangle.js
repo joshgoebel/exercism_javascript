@@ -36,7 +36,7 @@ export class Triangle {
   isIsosceles(){
     return this.valid() && this.matchingSides >= 2;
   }
-  isScalene(){
+  isScalene = () =>
     return this.valid() && this.matchingSides === 0;
   }
 

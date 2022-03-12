@@ -6,15 +6,15 @@ const isMine = (icon) => icon == MINE
 
 export const annotate = (board) => {
 	let grid = new Grid(board.map((row) => [...row]))
-	grid.visitEachSquare((x,y,contents) => {
+	grid.visitEachSquare((coordinates,contents) => {
 		if (isMine(contents)) { return }
 
 		let nearbyBombs = grid
-			.cellsAdjacentTo(x,y)
+			.cellsAdjacentTo(coordinates)
 			.filter(isMine)
 			.length
 
-		grid.setSquare(x,y, nearbyBombs ? nearbyBombs : BLANK)
+		grid.setSquare(coordinates, nearbyBombs || BLANK)
 	})
 
 	return grid.toString()

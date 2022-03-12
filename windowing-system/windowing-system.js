@@ -1,12 +1,12 @@
 // @ts-check
 
-function resize(width, height) {
-  this.width = Math.max(width ?? 80, 1);
-  this.height = Math.max(height ?? 60, 1);
+function resize(width = 80, height = 60) {
+  this.width = Math.max(width, 1);
+  this.height = Math.max(height, 1);
 }
 
 export function Size(width, height) {
-  resize.apply(this,[width,height]);
+  this.resize(width,height);
 }
 
 Size.prototype.resize = resize;
@@ -24,11 +24,12 @@ function moveOffset(x,y) {
 function ensureTopLeftOnscreen() {
   if (this.x < 0) this.x = 0;
   if (this.y < 0) this.y = 0;
+  return this;
 }
 
-export function Position(x, y) {
-  this.x = x ?? 0
-  this.y = y ?? 0
+export function Position(x = 0, y = 0) {
+  this.x = x;
+  this.y = y;
 }
 
 Position.prototype.moveOffset = moveOffset;
@@ -52,16 +53,15 @@ export class ProgramWindow {
     this.resizeIfTooLarge();
   }
   move(position) {
-    this.position = position;
-    this.position.ensureTopLeftOnscreen();
+    this.position = position.ensureTopLeftOnscreen();
+    if (this.fullyOnscreen()) return;
+
     this.moveOntoScreen();
   }
-  isOffscreen() {
-    return this.#isClippedBottom || this.#isClippedRight || this.position.x < 0 || this.position.y < 0
+  fullyOnscreen() {
+    return !(this.#isClippedBottom || this.#isClippedRight || this.position.x < 0 || this.position.y < 0)
   }
   moveOntoScreen() {
-    if (!this.isOffscreen()) return;
-
     let x = 0
     let y = 0;
     if (this.#isClippedRight) {

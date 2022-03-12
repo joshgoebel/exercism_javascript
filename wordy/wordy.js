@@ -5,74 +5,65 @@ const OPERATIONS = {
   "minus": (acc, n) => acc - n,
   "divided by": (acc, n) => acc / n
 }
-const VALID_OPS = Object.keys(OPERATIONS)
+const VALID_OPERATIONS = Object.keys(OPERATIONS)
 
-class TermStream {
-  constructor(stream) {
-    this.terms = stream
+// a simple union regex:
+//
+// - positive or negative number
+// - single word, possibly followed by `by`
+// - `?`
+const WORD_PROBLEM_LEXER_RE = /[+-]?\d+|\w+( by)?|[?]/g
+
+class Stream {
+  constructor(data, {regex}) {
+    this.items = data.match(regex)
   }
   peek() {
-    return this.terms[0]
+    return this.items[0]
   }
-  fetchNext() {
-    return this.terms.shift()
-  }
-  consumeNumber() {
-    return Number(this.fetchNext()) || null
+  consumeNext() {
+    return this.items.shift()
   }
   consume(term) {
-    let current = this.fetchNext()
-    return current === term ? term : null
+    return this.consumeNext() === term || null
+  }
+  expect(...terms) {
+    terms.forEach((term) => {
+      this.consume(term) || throws(new Error("Unknown operation"))
+    })
   }
 }
 
 export class WordProblem {
   constructor(question) {
-    if (question.endsWith("?"))
-      question = question.replace("?","")
-
-    this.stream = new TermStream(question.split(" "))
+    this.question = question
   }
   answer() {
-    this.expect("What")
-    this.expect("is")
+    this.stream = new Stream(this.question, {regex: WORD_PROBLEM_LEXER_RE})
+    this.stream.expect("What", "is")
 
     let acc = this.expectNumber();
-    while(this.more()) {
-      let [op, operand] = this.expectOperation();
+    while(this.stream.peek()) {
+      if (this.stream.peek() === "?") break;
+
+      let [op, operand] = [this.expectOp(), this.expectNumber()]
       acc = OPERATIONS[op](acc, operand)
     }
 
+    this.stream.expect("?")
     return acc
   }
-  expectOperation() {
-    return [this.expectOp(), this.expectNumber()]
-  }
-  expect(term) {
-    this.stream.consume(term) || throws(new Error("Unknown operation"))
-  }
   expectNumber() {
-    return this.stream.consumeNumber() || throws(new Error("Syntax error"))
-  }
-  expandMultiWordOp(op) {
-    if (this.stream.peek()==="by") {
-      this.stream.fetchNext()
-      op = `${op} by`
-    }
-    return op
+    return Number(this.stream.consumeNext()) || throws(new Error("Syntax error"))
   }
   expectOp() {
-    let op = this.stream.fetchNext()
-    // for some reason we want a numeric error if the op is a number
+    let op = this.stream.consumeNext()
+    // for some reason we want a syntax error if the op is a number
     // vs an invalid opcode error - blame it on the specs
     if (Number(op)) throw new Error("Syntax error")
 
-    op = this.expandMultiWordOp(op)
-    if (!VALID_OPS.includes(op)) throw new Error("Unknown operation")
+    if (!VALID_OPERATIONS.includes(op)) throw new Error("Unknown operation")
     return op
-  }
-  more() {
-    return this.stream.peek()
   }
 }
 

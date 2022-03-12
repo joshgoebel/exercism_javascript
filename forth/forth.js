@@ -55,7 +55,6 @@ export class Forth {
         while (token = this.parser.fetch()) {
             this._eval(token)
         }
-
     }
 
     _eval(token) {

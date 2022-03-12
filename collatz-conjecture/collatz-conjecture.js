@@ -4,7 +4,7 @@ export const steps = (n) => {
   }
 
   let steps = 0
-  while (n != 1) {
+  while (n !== 1) {
     if (isEven(n)) {
         n /= 2;
       } else { // odd

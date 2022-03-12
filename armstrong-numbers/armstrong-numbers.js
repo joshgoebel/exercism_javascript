@@ -1,11 +1,9 @@
 
-const isArmstrongNumber = (number) => {
-  const digits = number.toString()
-  const power = digits.length;
+const digits = (n) => [...n.toString()]
 
-  // const sum = [...digits].reduce((acc, el) => acc + el ** power, 0)
-  const sum = [...digits].map((el) => el ** power).sum()
-  // return sum
+const isArmstrongNumber = (number) => {
+  const power = digits(number).length;
+  const sum = digits(number).map((el) => el ** power).sum()
   return sum === number
 }
 
@@ -17,3 +15,4 @@ Array.prototype.sum = function(f = (x) => x, initial = 0)  {
 export {
   isArmstrongNumber as validate
 }
+

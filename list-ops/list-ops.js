@@ -59,12 +59,11 @@ export class List {
     return acc
   }
 
-  eachWithObject(obj, foldFunc) {
-    // for (let el of this) {
-    //   foldFunc(obj, el)
-    // }
-    // return obj
-    return this.foldl( (_,el) => { foldFunc(obj,el); return obj }, obj);
+  eachWithObject(obj,foldFunc) {
+    for (let el of this) {
+      foldFunc(obj, el)
+    }
+    return obj
   }
 
   foldr(foldFunc, acc) {
