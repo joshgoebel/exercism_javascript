@@ -42,33 +42,39 @@ export class Zipper {
     }
 
     setLeft(left) {
-        let newNode = {...this.node, left }
+        const newNode = {...this.node, left }
         return new Zipper(newNode, { parent: this.parent, childKey: this.childKey })
     }
 
     setRight(right) {
-        let newNode = { ...this.node, right }
+        const newNode = { ...this.node, right }
         return new Zipper(newNode, { parent: this.parent, childKey: this.childKey })
     }
 
     setValue(value) {
-        let newNode = {...this.node, value }
+        const newNode = {...this.node, value }
         return new Zipper(newNode, {parent: this.parent, childKey: this.childKey})
     }
 
-    value = () =>  this.node.value
+    value() {
+        return this.node.value
+    }
 
     up() {
         if (this.isRoot) return null;
 
+        let dirty = this.parent.node[this.childKey] !== this.node;
         return new Zipper(
-            {
+            // avoid patching the parent if not strictly necessary
+            dirty
+            ? {
                 ...this.parent.node,
-                // rewrite `left` or `right` paretn key to point to the
+                // rewrite `left` or `right` parent key to point to the
                 // current iteration of `this.node` (because it may have
                 // changed since we descended)
                 [this.childKey]: this.node,
-            },
+              }
+            : this.parent.node,
             {
                 parent: this.parent.parent,
                 childKey: this.parent.childKey

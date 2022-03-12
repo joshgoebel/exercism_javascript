@@ -1,7 +1,5 @@
 import { Zipper } from './zipper';
 
-// Tests adapted from `problem-specifications/zipper/canonical-data.json` @ v1.0.0
-
 function bt(value, left, right) {
   return {
     value,
@@ -17,6 +15,7 @@ function leaf(value) {
 describe('Zipper', () => {
   const t1 = bt(1, bt(2, null, leaf(3)), leaf(4));
   const t2 = bt(1, bt(5, null, leaf(3)), leaf(4));
+  const t3 = bt(1, bt(2, leaf(5), leaf(3)), leaf(4));
   const t4 = bt(1, leaf(2), leaf(4));
   const t5 = bt(1, bt(2, null, leaf(3)), bt(6, leaf(7), leaf(8)));
   const t6 = bt(1, bt(2, null, leaf(5)), leaf(4));
@@ -25,47 +24,6 @@ describe('Zipper', () => {
   beforeEach(() => {
     zipper = Zipper.fromTree(t1);
   });
-
-  test ('go left, set value, go up, go left again, check value', () => {
-    zipper = Zipper.fromTree(bt(0, leaf(1), leaf(2)));
-    let left = zipper.left();
-    let newLeft = left.setValue(9999);
-    let parent = newLeft.up();
-    let leftAgain = parent.left();
-    expect(left.value()).toEqual(1);
-    expect(leftAgain.value()).toEqual(newLeft.value());
-  })
-
-
-  test('left returns a new Zipper', () => {
-    let left = zipper.left();
-    expect(left).not.toBe(zipper)
-  })
-
-  test('right returns a new Zipper', () => {
-    let right = zipper.right();
-    expect(right).not.toBe(zipper)
-  })
-
-  test('setValue returns a new Zipper', () => {
-    let anotherZipper = zipper.setValue(99);
-    expect(anotherZipper).not.toBe(zipper)
-  })
-
-  test('setRight returns a new Zipper', () => {
-    let right = zipper.setRight(bt(55,null,null));
-    expect(right).not.toBe(zipper)
-  })
-
-  test('setLeft returns a new Zipper', () => {
-    let left = zipper.setLeft(bt(55,null,null));
-    expect(left).not.toBe(zipper)
-  })
-
-  test('up returns a new Zipper', () => {
-    let up = zipper.right().up();
-    expect(zipper).not.toBe(up)
-  })
 
   test('data is retained', () => {
     expect(zipper.toTree()).toEqual(t1);
@@ -88,10 +46,7 @@ describe('Zipper', () => {
   });
 
   test('left, right and up', () => {
-    expect(zipper.left().up().right().up()
-      .left()
-      .right()
-      .value()).toEqual(3);
+    expect(zipper.left().up().right().up().left().right().value()).toEqual(3);
   });
 
   test('setValue', () => {
@@ -99,15 +54,10 @@ describe('Zipper', () => {
   });
 
   test('setValue after traversing up', () => {
-    expect(zipper.left().right().up().setValue(5)
-      .toTree()).toEqual(t2);
+    expect(zipper.left().right().up().setValue(5).toTree()).toEqual(t2);
   });
 
   test('setLeft with leaf', () => {
-    // const t1 = bt(1, bt(2, null, leaf(3)), leaf(4));
-    const t3 = bt(1, bt(2, leaf(5), leaf(3)), leaf(4));
-    // console.log(zipper)
-    // console.log(zipper.left())
     expect(zipper.left().setLeft(leaf(5)).toTree()).toEqual(t3);
   });
 
@@ -122,4 +72,47 @@ describe('Zipper', () => {
   test('setValue on deep focus', () => {
     expect(zipper.left().right().setValue(5).toTree()).toEqual(t6);
   });
+
+  test('left returns a new Zipper', () => {
+    const left = zipper.left();
+    expect(left).not.toBe(zipper);
+  });
+
+  test('right returns a new Zipper', () => {
+    const right = zipper.right();
+    expect(right).not.toBe(zipper);
+  });
+
+  test('setValue returns a new Zipper', () => {
+    const anotherZipper = zipper.setValue(99);
+    expect(anotherZipper).not.toBe(zipper);
+  });
+
+  test('setRight returns a new Zipper', () => {
+    const right = zipper.setRight(bt(55, null, null));
+    expect(right).not.toBe(zipper);
+  });
+
+  test('setLeft returns a new Zipper', () => {
+    const left = zipper.setLeft(bt(55, null, null));
+    expect(left).not.toBe(zipper);
+  });
+
+  test('up returns a new Zipper', () => {
+    const up = zipper.right().up();
+    expect(zipper).not.toBe(up);
+  });
+
+  test('should access same node via different paths', () => {
+    const z1 = zipper.left().up().right();
+    const z2 = zipper.right();
+    expect(z1.node).toBe(z2.node);
+  });
 });
+
+export function applyMondayBonus(scoreBoard) {
+  for(let player in scoreBoard){
+    scoreBoard[player]+=100
+  }
+  return scoreBoard;
+}
