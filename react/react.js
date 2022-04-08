@@ -1,5 +1,5 @@
-const CALCULATE = "calculate"
-const CHANGES_COMPLETE = "changesComplete"
+const EV_CALCULATE = "calculate"
+const EV_CHANGES_COMPLETE = "changesComplete"
 
 const HasCallbacks = (base)  => class extends base {
   constructor() {
@@ -42,6 +42,7 @@ const mixin = (...mixins) => mixins.reduce((acc, mix) => mix(acc), class {})
 class ValueCell extends mixin(HasCallbacks, HasDependentEvents) {
   constructor(value) {
     super();
+    // private values aren't inherited, so we use fake privacy
     this._value = value
   }
 
@@ -59,54 +60,56 @@ export class InputCell extends ValueCell {
     if (new_value===this.value) { return }
 
     this._value = new_value
-    this.fire(CALCULATE, CHANGES_COMPLETE)
+    this.fire(EV_CALCULATE, EV_CHANGES_COMPLETE)
   }
 }
 
 export class ComputeCell extends ValueCell {
   #priorValue
+  #computeFn
+  #sourceCells
   constructor(sourceCells, computeFn) {
     super()
-    this.registerInputs(sourceCells)
-    this.computeFn = computeFn
+    this.#registerInputs(sourceCells)
+    this.#computeFn = computeFn
 
-    this.calculateInitialValue()
+    this.#calculateInitialValue()
   }
 
-  calculateInitialValue() {
-    this.recalc()
+  #calculateInitialValue() {
+    this.#recalc()
     this.#priorValue = this._value
   }
 
-  registerInputs(sourceCells) {
-    this.sourceCells = sourceCells
-    this.sourceCells.forEach(cell => cell.providesSource(this))
+  #registerInputs(sourceCells) {
+    this.#sourceCells = sourceCells
+    this.#sourceCells.forEach(cell => cell.providesSource(this))
   }
 
-  recalc() {
-    this._value = this.computeFn(this.sourceCells)
+  #recalc() {
+    this._value = this.#computeFn(this.#sourceCells)
   }
 
-  hasChanged() {
+  #hasChanged() {
     return this.value != this.#priorValue;
   }
 
   // when an Cell changes it fires the changed event
   // which propagates to all dependencies down the line
   "ev:calculate"() {
-    this.recalc()
-    this.fire(CALCULATE)
+    this.#recalc()
+    this.fire(EV_CALCULATE)
   }
 
   // this is fired after changes are complete. It's a separate
   // event to make sure the changed event has fully propagated
   // before any callbacks are fired
   "ev:changesComplete"() {
-    if (this.hasChanged() ) {
+    if (this.#hasChanged() ) {
       this.fireCallbacks()
       this.#priorValue = this.value
     }
-    this.fire(CHANGES_COMPLETE)
+    this.fire(EV_CHANGES_COMPLETE)
   }
 }
 
@@ -120,12 +123,18 @@ export class ComputeCell extends ValueCell {
 // })
 
 export class CallbackCell {
+  #callback
+  #values
   constructor(callback) {
-    this.callback = callback
-    this.values = []
+    this.#callback = callback
+    this.#values = []
   }
 
   fire(boundCell) {
-    this.values.push(this.callback(boundCell))
+    this.#values.push(this.#callback(boundCell))
+  }
+
+  get values() {
+    return this.#values.slice();
   }
 }
