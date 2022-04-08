@@ -73,7 +73,6 @@ export class ComputeCell extends ValueCell {
     }
 
     calculateInitialValue() {
-        this._changed = false
         this.recalc()
         this._oldvalue = this._value
     }
